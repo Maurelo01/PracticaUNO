@@ -108,7 +108,6 @@ class Pila
                 delete aBorrar->dato; 
                 delete aBorrar;
                 tamaño--;
-                cout << "   [Pila] Carta eliminada del tope." << endl;
             }
             if (tope == nullptr) return;
             Nodo<T>* actual = tope;
@@ -121,7 +120,6 @@ class Pila
                     delete aBorrar->dato;
                     delete aBorrar;
                     tamaño--;
-                    cout << "   [Pila] Carta eliminada de en medio." << endl;
                 }
                 else 
                 {
