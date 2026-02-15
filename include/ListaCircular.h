@@ -63,6 +63,26 @@ class ListaCircular
             if (actual == nullptr) return nullptr;
             return actual->dato;
         }
+
+        void eliminarActual()
+        {
+            if (actual == nullptr) return;
+            Nodo<T>* aBorrar = actual;
+            if (actual->siguiente == actual)
+            {
+                actual = nullptr;
+            } 
+            else
+            {
+                Nodo<T>* anterior = actual->anterior;
+                Nodo<T>* siguiente = actual->siguiente;
+                anterior->siguiente = siguiente;
+                siguiente->anterior = anterior;
+                actual = siguiente;
+            }
+            delete aBorrar;
+            tamaño--;
+        }
         
         Nodo<T>* getNodoActual()
         {
