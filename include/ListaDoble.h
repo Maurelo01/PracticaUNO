@@ -1,9 +1,7 @@
 #ifndef LISTADOBLE_H
 #define LISTADOBLE_H
-
 #include "Nodo.h"
-#include <iostream>
-
+#include "Carta.h"
 using namespace std;
 
 template <class T>
