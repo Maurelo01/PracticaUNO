@@ -26,10 +26,17 @@ class Juego
         bool ladoFlipActivo;
         void generarCartas(int numMazos); 
         void repartirCartasIniciales();
+        void limpiarPantalla();
+        void reponerMazo();
+        void mostrarMesa(Jugador* actual, Carta* cartaTopeVisual);
+        Color pedirColorUsuario();
     public:
         Juego();
         ~Juego();
         void inicializar(int numJugadores, ReglasFlags configuracion);
+        void flujoPrincipal();
+        void gestionarTurno();
+        bool verificarGanador();
         int getCartasEnMazo();
         int getCartasEnDescarte();
         int getCantidadJugadores();
