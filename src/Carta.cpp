@@ -31,7 +31,10 @@ void Carta::voltear()
 
 bool Carta::esCompatible(Carta* otra) 
 {
-    if (this->color == NEGRO || this->tipo == COMODIN_COLOR || this->tipo == MAS_CUATRO || this->tipo == MAS_DOS || this->tipo == DESTRUCTORA || this->tipo == PASAR_EXTREMO) { return true; }
+    if (this->color == NEGRO || this->tipo == COMODIN_COLOR || this->tipo == MAS_CUATRO || this->tipo == DESTRUCTORA || this->tipo == PASAR_EXTREMO)
+    {
+        return true;
+    }
     return (this->color == otra->getColor()) || (this->tipo == otra->getTipo()) || (this->valor != -1 && this->valor == otra->getValor());
 }
 
@@ -51,7 +54,6 @@ string Carta::toString()
         case VIOLETA: nomColor = "VIOLETA(F)"; break;
         default: nomColor = "???";
     }
-
     string nomTipo;
     switch(tipo)
     {
@@ -59,7 +61,10 @@ string Carta::toString()
         case SALTO: nomTipo = "SALTO"; break;
         case REVERSA: nomTipo = "REVERSA"; break;
         case MAS_UNO: nomTipo = "+1"; break; 
-        case MAS_DOS: nomTipo = "+2"; break; 
+        case MAS_DOS:
+            if (color == NEGRO) nomTipo = "+2 (WILD)"; 
+            else nomTipo = "+2"; 
+            break;
         case MAS_CUATRO: nomTipo = "+4"; break;
         case COMODIN_COLOR: nomTipo = "CAMBIO COLOR"; break;
         case SALTO_TODOS: nomTipo = "SALTO TODOS"; break;
