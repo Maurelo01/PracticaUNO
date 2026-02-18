@@ -149,7 +149,7 @@ void Juego::gestionarTurno()
         limpiarPantalla();
         mostrarMesa(actual, topeVisual);
         int opcion;
-        cout << "-> Elige una carta por su indice o escribe (-1') para robar: ";
+        cout << "-> Elige una carta por su indice o escribe (-1) para robar: ";
         if (!(cin >> opcion))
         {
             cin.clear();
@@ -192,16 +192,7 @@ void Juego::gestionarTurno()
                             if(ladoFlipActivo) robadaVisual->setColor(nuevoColor);
                             cout << "-> COLOR CAMBIADO A: " << nombreColor(nuevoColor) << endl;
                         }
-                        if (robadaVisual->getTipo() == FLIP)
-                        {
-                            ladoFlipActivo = !ladoFlipActivo;
-                            cout << "¡¡¡MODO FLIP!!! CAMBIANDO DE LADO " << (ladoFlipActivo ? "OSCURO" : "CLARO") << endl;
-                        }
-                        if (robadaVisual->getTipo() == REVERSA)
-                        {
-                            direccionDerecha = !direccionDerecha;
-                            cout << "-> Sentido del juego invertido." << endl;
-                        }
+                        aplicarCartaEspecial(robadaVisual);
                     }
                 }
                 turnoTerminado = true;
@@ -216,7 +207,6 @@ void Juego::gestionarTurno()
                 actual->jugarCarta(opcion);
                 descarte->apilar(cartaFisica);
                 cout << "-> Jugaste: " << cartaVisual->toString() << endl;
-                TipoCarta tipoJugado = cartaVisual->getTipo();
                 if (cartaVisual->getColor() == NEGRO)
                 {
                     Color nuevoColor = pedirColorUsuario();
@@ -224,16 +214,7 @@ void Juego::gestionarTurno()
                     if(ladoFlipActivo) cartaVisual->setColor(nuevoColor);
                     cout << "-> COLOR CAMBIADO A: " << nombreColor(nuevoColor) << endl;
                 }
-                if (tipoJugado == FLIP)
-                {
-                    ladoFlipActivo = !ladoFlipActivo;
-                    cout << "¡¡¡MODO FLIP!!! CAMBIANDO DE LADO " << (ladoFlipActivo ? "OSCURO" : "CLARO") << endl;
-                }
-                if (tipoJugado == REVERSA)
-                {
-                    direccionDerecha = !direccionDerecha;
-                    cout << "-> Sentido de juego invertido." << endl;
-                }
+                aplicarCartaEspecial(cartaVisual);
                 turnoTerminado = true;
             }
             else
@@ -246,6 +227,88 @@ void Juego::gestionarTurno()
         else
         {
             cout << "Indice incorrecto." << endl;
+        }
+    }
+}
+
+void Juego::aplicarCartaEspecial(Carta* cartaJugada)
+{
+    TipoCarta tipo = cartaJugada->getTipo();
+    if (tipo == REVERSA)
+    {
+        direccionDerecha = !direccionDerecha;
+        cout << " ¡Cambio de sentido! Ahora el sentido es hacia la " << (direccionDerecha ? "DERECHA" : "IZQUIERDA") << endl;
+        if (jugadores->getTamaño() == 2)
+        {
+            cout << " ¡Repites turno!" << endl;
+            if (direccionDerecha) jugadores->siguiente();
+            else jugadores->anterior();
+        }
+    }
+    else if (tipo == SALTO)
+    {
+        cout << " ¡Salto de turno!" << endl;
+        if (direccionDerecha) jugadores->siguiente();
+        else jugadores->anterior();
+        if (jugadores->getTamaño() == 2)
+        {
+            cout << " ¡Repites turno!" << endl;
+        }
+    }
+    else if (tipo == SALTO_TODOS)
+    {
+        cout << " ¡SALTO A TODOS! Repites turno." << endl;
+        if (direccionDerecha) jugadores->anterior();
+        else jugadores->siguiente();
+    }
+    else if (tipo == FLIP)
+    {
+        ladoFlipActivo = !ladoFlipActivo;
+        cout << " ¡¡¡CAMBIO DE LADO!!! CAMBIANDO AL " << (ladoFlipActivo ? "LADO OSCURO" : "LADO CLARO") << endl;
+    }
+    else if (tipo == MAS_UNO || tipo == MAS_DOS || tipo == MAS_CUATRO || tipo == MAS_TRES || tipo == MAS_SEIS)
+    {
+        int cantidad = 0;
+        if (tipo == MAS_UNO) cantidad = 1;
+        else if (tipo == MAS_DOS) cantidad = 2;
+        else if (tipo == MAS_TRES) cantidad = 3;
+        else if (tipo == MAS_CUATRO) cantidad = 4;
+        else if (tipo == MAS_SEIS) cantidad = 6;
+        if (direccionDerecha) jugadores->siguiente();
+        else jugadores->anterior();
+        Jugador* victima = jugadores->obtenerActual();
+        cout << victima->getNombre() << " ¡¡¡PIERDE TURNO Y ROBA!!! Total de cartas robadas: " << cantidad << endl;
+        for(int i = 0; i < cantidad; i++) 
+        {
+            if (mazo->estaVacia()) reponerMazo();
+            if (!mazo->estaVacia()) 
+            {
+                Carta* c = mazo->desapilar();
+                victima->robarCarta(c);
+            }
+        }
+    }
+    else if (tipo == COLOR_ETERNO)
+    {
+        if (direccionDerecha) jugadores->siguiente();
+        else jugadores->anterior();
+        Jugador* victima = jugadores->obtenerActual();
+        Color objetivo = cartaJugada->getColor(); 
+        cout << " ¡¡¡COLOR ETERNO!!! " << victima->getNombre() << " roba hasta encontrar una carta color: " << nombreColor(objetivo) << "." << endl;
+        bool encontrado = false;
+        while (!encontrado)
+        {
+            if (mazo->estaVacia()) reponerMazo();
+            if (mazo->estaVacia()) break; 
+            Carta* c = mazo->desapilar();
+            victima->robarCarta(c);
+            Carta* visualC = ladoFlipActivo ? c->getLadoOscuro() : c;
+            cout << " -> Robo: " << visualC->toString() << endl;
+            if (visualC->getColor() == objetivo)
+            {
+                encontrado = true;
+                cout << " ¡Encontrado! Deja de tomar cartas." << endl;
+            }
         }
     }
 }

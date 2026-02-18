@@ -28,6 +28,7 @@ class Juego
         void repartirCartasIniciales();
         void limpiarPantalla();
         void reponerMazo();
+        void aplicarCartaEspecial(Carta* cartaJugada);
         void mostrarMesa(Jugador* actual, Carta* cartaTopeVisual);
         Color pedirColorUsuario();
     public:
