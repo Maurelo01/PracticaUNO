@@ -35,6 +35,7 @@ class Carta
         Carta* getLadoOscuro();
         bool getEsLadoOscuro();
         void setLadoOscuro(Carta* reverso);
+        void setColor(Color nuevoColor);
         void voltear(); // Cambia la carta al lado opuesto visualmente
         bool esCompatible(Carta* otra); // Valida si se puede jugar sobre otra
         string toString();

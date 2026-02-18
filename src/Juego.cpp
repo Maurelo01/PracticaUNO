@@ -53,25 +53,46 @@ bool Juego::verificarGanador()
 
 Color Juego::pedirColorUsuario()
 {
-    int color = 0;
+    int opcion = 0;
     while (true) 
     {
-        cout << "Elige el nuevo color: 1. ROJO 2. AZUL 3. VERDE 4. AMARILLO: ";
-        if (!(cin >> color))
+        if (!ladoFlipActivo) 
         {
-            cin.clear();
-            string sueltos; 
-            getline(cin, sueltos);
-            cout << "Entrada invalida, debes ingresar un numero." << endl;
-            continue;
+            cout << "Elige el nuevo color: 1.ROJO  2.AZUL  3.VERDE  4.AMARILLO: ";
+            if (!(cin >> opcion))
+            {
+                cin.clear();
+                string sueltos;
+                getline(cin, sueltos);
+                continue;
+            }
+            switch(opcion)
+            {
+                case 1: return ROJO;
+                case 2: return AZUL;
+                case 3: return VERDE;
+                case 4: return AMARILLO;
+                default: cout << "Opcion invalida." << endl;
+            }
         }
-        switch(color)
+        else 
         {
-            case 1: return ROJO;
-            case 2: return AZUL;
-            case 3: return VERDE;
-            case 4: return AMARILLO;
-            default: cout << "Opcion invalida. Intenta de nuevo." << endl;
+            cout << "Elige el nuevo color: 1.ROSA  2.TURQUESA  3.NARANJA  4.VIOLETA: ";
+            if (!(cin >> opcion))
+            {
+                cin.clear();
+                string sueltos;
+                getline(cin, sueltos);
+                continue;
+            }
+            switch(opcion)
+            {
+                case 1: return ROSA;
+                case 2: return TURQUESA;
+                case 3: return NARANJA;
+                case 4: return VIOLETA;
+                default: cout << "Opcion invalida." << endl;
+            }
         }
     }
 }
@@ -98,6 +119,23 @@ void Juego::mostrarMesa(Jugador* actual, Carta* topeVisual)
 void Juego::limpiarPantalla()
 {
     cout << "\033[2J"; // ANSI para limpiar pantalla
+}
+
+string nombreColor(Color c)
+{
+    switch(c)
+    {
+        case ROJO: return "ROJO";
+        case AZUL: return "AZUL";
+        case VERDE: return "VERDE";
+        case AMARILLO: return "AMARILLO";
+        case NEGRO: return "NEGRO";
+        case ROSA: return "ROSA";
+        case TURQUESA: return "TURQUESA";
+        case NARANJA: return "NARANJA";
+        case VIOLETA: return "VIOLETA";
+        default: return "DESCONOCIDO";
+    }
 }
 
 void Juego::gestionarTurno()
@@ -150,7 +188,9 @@ void Juego::gestionarTurno()
                         if (robadaVisual->getColor() == NEGRO)
                         {
                             Color nuevoColor = pedirColorUsuario();
-                            cout << "-> COLOR CAMBIADO A: " << nuevoColor << endl;
+                            robada->setColor(nuevoColor); 
+                            if(ladoFlipActivo) robadaVisual->setColor(nuevoColor);
+                            cout << "-> COLOR CAMBIADO A: " << nombreColor(nuevoColor) << endl;
                         }
                         if (robadaVisual->getTipo() == FLIP)
                         {
@@ -180,7 +220,9 @@ void Juego::gestionarTurno()
                 if (cartaVisual->getColor() == NEGRO)
                 {
                     Color nuevoColor = pedirColorUsuario();
-                    cout << "-> COLOR CAMBIADO A: " << nuevoColor << endl;
+                    cartaFisica->setColor(nuevoColor);
+                    if(ladoFlipActivo) cartaVisual->setColor(nuevoColor);
+                    cout << "-> COLOR CAMBIADO A: " << nombreColor(nuevoColor) << endl;
                 }
                 if (tipoJugado == FLIP)
                 {
