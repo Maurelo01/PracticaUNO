@@ -35,7 +35,24 @@ bool Carta::esCompatible(Carta* otra)
     {
         return true;
     }
-    return (this->color == otra->getColor()) || (this->tipo == otra->getTipo()) || (this->valor != -1 && this->valor == otra->getValor());
+    if (this->color == otra->getColor())
+    {
+        return true;
+    }
+    if (this->tipo == otra->getTipo())
+    {
+        if (this->tipo == NUMERO)
+        {
+            return (this->valor == otra->getValor());
+        }
+        return true;
+    }
+    return false;
+}
+
+void Carta::setColor(Color nuevoColor) 
+{
+    this->color = nuevoColor;
 }
 
 string Carta::toString()
@@ -77,6 +94,3 @@ string Carta::toString()
     }
     return "[" + nomColor + " | " + nomTipo + "]";
 }
-
-
-
