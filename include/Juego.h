@@ -24,12 +24,14 @@ class Juego
         ReglasFlags reglas;
         bool direccionDerecha;        
         bool ladoFlipActivo;
+        int cartasAcumuladas;
         void generarCartas(int numMazos); 
         void repartirCartasIniciales();
         void limpiarPantalla();
         void reponerMazo();
-        void aplicarCartaEspecial(Carta* cartaJugada);
+        void aplicarCartaEspecial(Carta* cartaJugada, bool teniaOpcionDeCarta);
         void mostrarMesa(Jugador* actual, Carta* cartaTopeVisual);
+        TipoCarta tipoAcumulado;
         Color pedirColorUsuario();
     public:
         Juego();
@@ -37,7 +39,7 @@ class Juego
         void inicializar(int numJugadores, ReglasFlags configuracion);
         void flujoPrincipal();
         void gestionarTurno();
-        bool verificarGanador();
+        Jugador* verificarGanador();
         int getCartasEnMazo();
         int getCartasEnDescarte();
         int getCantidadJugadores();
