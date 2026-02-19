@@ -10,6 +10,8 @@ Juego::Juego()
     jugadores = new ListaCircular<Jugador*>();
     direccionDerecha = true;
     ladoFlipActivo = false;
+    cartasAcumuladas = 0;           
+    tipoAcumulado = NUMERO;
     srand(time(0));
 }
 
@@ -27,11 +29,11 @@ void Juego::flujoPrincipal()
     while (!juegoTerminado)
     {
         gestionarTurno();
-
-        if (verificarGanador())
+        Jugador* ganador = verificarGanador();
+        if (ganador != nullptr)
         {
             limpiarPantalla();
-            cout << " ¡¡¡" << jugadores->obtenerActual()->getNombre() << " es el Ganador!!! " << endl;
+            cout << " ¡¡¡" << ganador->getNombre() << " es el Ganador!!! " << endl;
             juegoTerminado = true;
         }
         else
@@ -46,9 +48,21 @@ void Juego::flujoPrincipal()
     }
 }
 
-bool Juego::verificarGanador()
+Jugador* Juego::verificarGanador()
 {
-    return jugadores->obtenerActual()->cantidadCartas() == 0;
+    Nodo<Jugador*>* actual = jugadores->getNodoActual();
+    if (actual == nullptr) return nullptr;
+    Nodo<Jugador*>* inicio = actual;
+    do 
+    {
+        if (actual->dato->cantidadCartas() == 0)
+        {
+            return actual->dato;
+        }
+        actual = actual->siguiente;
+    }
+    while (actual != inicio);
+    return nullptr;
 }
 
 Color Juego::pedirColorUsuario()
@@ -148,7 +162,12 @@ void Juego::gestionarTurno()
     {
         limpiarPantalla();
         mostrarMesa(actual, topeVisual);
-        int opcion;
+        int opcion = 0;
+        if (cartasAcumuladas > 0)
+        {
+            cout << " Tienes " << cartasAcumuladas << " cartas acumuladas para robar del mazo." << endl;
+            cout << " Elige tirar una carta igual para acumular más, o escribe (-1) para aceptar tu triste destino." << endl;
+        }
         cout << "-> Elige una carta por su indice o escribe (-1) para robar: ";
         if (!(cin >> opcion))
         {
@@ -159,6 +178,19 @@ void Juego::gestionarTurno()
         }
         if (opcion == -1)
         {
+            if (cartasAcumuladas > 0)
+            {
+                cout << " Has aceptado tu destino. Tomas " << cartasAcumuladas << " cartas." << endl;
+                for(int i=0; i<cartasAcumuladas; i++)
+                {
+                    if (mazo->estaVacia()) reponerMazo();
+                    if (!mazo->estaVacia()) actual->robarCarta(mazo->desapilar());
+                }
+                cartasAcumuladas = 0;
+                tipoAcumulado = NUMERO;
+                turnoTerminado = true;
+                continue;
+            }
             if (mazo->estaVacia())
             {
                 reponerMazo();
@@ -192,7 +224,7 @@ void Juego::gestionarTurno()
                             if(ladoFlipActivo) robadaVisual->setColor(nuevoColor);
                             cout << "-> COLOR CAMBIADO A: " << nombreColor(nuevoColor) << endl;
                         }
-                        aplicarCartaEspecial(robadaVisual);
+                        aplicarCartaEspecial(robadaVisual, false);
                     }
                 }
                 turnoTerminado = true;
@@ -202,11 +234,18 @@ void Juego::gestionarTurno()
         {
             Carta* cartaFisica = actual->getMano()->obtenerPorIndice(opcion);
             Carta* cartaVisual = ladoFlipActivo ? cartaFisica->getLadoOscuro() : cartaFisica;
-            if (cartaVisual->esCompatible(topeVisual))
+            if (cartasAcumuladas > 0)
             {
+                if (cartaVisual->getTipo() != tipoAcumulado)
+                {
+                    cout << " !!!Movimiento Invalido. En acumulacion solo puedes tirar un " << (tipoAcumulado == MAS_DOS ? "+2" : "+4") << endl;
+                    cout << "Presiona Enter.";
+                    cin.ignore();
+                    cin.get();
+                    continue;
+                }
                 actual->jugarCarta(opcion);
                 descarte->apilar(cartaFisica);
-                cout << "-> Jugaste: " << cartaVisual->toString() << endl;
                 if (cartaVisual->getColor() == NEGRO)
                 {
                     Color nuevoColor = pedirColorUsuario();
@@ -214,14 +253,44 @@ void Juego::gestionarTurno()
                     if(ladoFlipActivo) cartaVisual->setColor(nuevoColor);
                     cout << "-> COLOR CAMBIADO A: " << nombreColor(nuevoColor) << endl;
                 }
-                aplicarCartaEspecial(cartaVisual);
+                aplicarCartaEspecial(cartaVisual, false);
                 turnoTerminado = true;
             }
             else
             {
-                cout << " !!!Movimiento Invalido. No coincide con " << topeVisual->toString() << endl;
-                cout << "Presiona Enter.";
-                cin.ignore(); cin.get();
+                if (cartaVisual->esCompatible(topeVisual))
+                {
+                    bool teniaOpcion = false;
+                    for(int i = 0; i < actual->cantidadCartas(); i++)
+                    {
+                        if (i == opcion) continue;
+                        Carta* cartaEnMano = actual->getMano()->obtenerPorIndice(i);
+                        Carta* cartaVisible = ladoFlipActivo ? cartaEnMano->getLadoOscuro() : cartaEnMano;
+                        if (cartaVisible->getColor() == topeVisual->getColor() || (cartaVisible->getTipo() == NUMERO && topeVisual->getTipo() == NUMERO && cartaVisible->getValor() == topeVisual->getValor()))
+                        {
+                            teniaOpcion = true;
+                            break;
+                        }
+                    }
+                    actual->jugarCarta(opcion);
+                    descarte->apilar(cartaFisica);
+                    cout << "-> Jugaste: " << cartaVisual->toString() << endl;
+                    if (cartaVisual->getColor() == NEGRO)
+                    {
+                        Color nuevoColor = pedirColorUsuario();
+                        cartaFisica->setColor(nuevoColor);
+                        if(ladoFlipActivo) cartaVisual->setColor(nuevoColor);
+                        cout << "-> COLOR CAMBIADO A: " << nombreColor(nuevoColor) << endl;
+                    }
+                    aplicarCartaEspecial(cartaVisual, teniaOpcion);
+                    turnoTerminado = true;
+                }
+                else
+                {
+                    cout << " !!!Movimiento Invalido. No coincide con " << topeVisual->toString() << endl;
+                    cout << "Presiona Enter.";
+                    cin.ignore(); cin.get();
+                }
             }
         }
         else
@@ -231,7 +300,7 @@ void Juego::gestionarTurno()
     }
 }
 
-void Juego::aplicarCartaEspecial(Carta* cartaJugada)
+void Juego::aplicarCartaEspecial(Carta* cartaJugada, bool teniaOpcionDeCarta)
 {
     TipoCarta tipo = cartaJugada->getTipo();
     if (tipo == REVERSA)
@@ -274,17 +343,53 @@ void Juego::aplicarCartaEspecial(Carta* cartaJugada)
         else if (tipo == MAS_TRES) cantidad = 3;
         else if (tipo == MAS_CUATRO) cantidad = 4;
         else if (tipo == MAS_SEIS) cantidad = 6;
-        if (direccionDerecha) jugadores->siguiente();
-        else jugadores->anterior();
-        Jugador* victima = jugadores->obtenerActual();
-        cout << victima->getNombre() << " ¡¡¡PIERDE TURNO Y ROBA!!! Total de cartas robadas: " << cantidad << endl;
-        for(int i = 0; i < cantidad; i++) 
+        if ((tipo == MAS_CUATRO || tipo == MAS_SEIS) && reglas.retoMasCuatro && cartasAcumuladas == 0) 
         {
-            if (mazo->estaVacia()) reponerMazo();
-            if (!mazo->estaVacia()) 
+            Jugador* victima = (direccionDerecha) ? jugadores->getNodoActual()->siguiente->dato : jugadores->getNodoActual()->anterior->dato;
+            cout << victima->getNombre() << " te han lanzado un +" << cantidad << "." << endl;
+            cout << " ¿Deseas RETAR al rival? (Si pierdes tendras que tomar +2 cartas extra) (s/n): ";
+            char resp;
+            cin >> resp;
+            if (resp == 's' || resp == 'S') 
             {
-                Carta* c = mazo->desapilar();
-                victima->robarCarta(c);
+                if (teniaOpcionDeCarta)
+                {
+                    cout << " ¡RETO GANADO! El rival tenia cartas jugables, ahora el toma el castigo y roba " << cantidad << " cartas." << endl;
+                    Jugador* lanzador = jugadores->obtenerActual();
+                    for(int i=0; i<cantidad; i++)
+                    {
+                        if(!mazo->estaVacia()) lanzador->robarCarta(mazo->desapilar());
+                    }
+                    return;
+                }
+                else
+                {
+                    cout << " ¡RETO PERDIDO! El rival tiro legal. " << victima->getNombre() << " roba " << cantidad + 2 << " y pierde turno." << endl;
+                    if (direccionDerecha) jugadores->siguiente();
+                    else jugadores->anterior();
+                    for(int i=0; i<cantidad+2; i++)
+                    {
+                        if(!mazo->estaVacia()) victima->robarCarta(mazo->desapilar());
+                    }
+                    return;
+                }
+            }
+        }
+        if (reglas.acumulacion && (tipo == MAS_DOS || tipo == MAS_CUATRO || tipo == MAS_SEIS || tipo == MAS_TRES || tipo == MAS_UNO)) 
+        {
+            cartasAcumuladas += cantidad;
+            tipoAcumulado = tipo;
+            cout << " ¡Se han acumulado " << cartasAcumuladas << " cartas para el siguiente jugador!" << endl;
+        }
+        else 
+        {
+            if (direccionDerecha) jugadores->siguiente(); else jugadores->anterior();
+            Jugador* victima = jugadores->obtenerActual();
+            cout << victima->getNombre() << " ¡¡¡PIERDE TURNO Y ROBA!!! Total: " << cantidad << endl;
+            for(int i = 0; i < cantidad; i++)
+            {
+                if (mazo->estaVacia()) reponerMazo();
+                if (!mazo->estaVacia()) victima->robarCarta(mazo->desapilar());
             }
         }
     }
