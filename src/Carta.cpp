@@ -57,40 +57,92 @@ void Carta::setColor(Color nuevoColor)
 
 string Carta::toString()
 {
-    string nomColor;
+    string nomColor = "";
+    string codColor = "";
     switch(color) 
     {
-        case ROJO: nomColor = "ROJO"; break;
-        case AZUL: nomColor = "AZUL"; break;
-        case VERDE: nomColor = "VERDE"; break;
-        case AMARILLO: nomColor = "AMARILLO"; break;
-        case NEGRO: nomColor = "NEGRO (WILD)"; break; 
-        case ROSA: nomColor = "ROSA(F)"; break;
-        case TURQUESA: nomColor = "TURQUESA(F)"; break;
-        case NARANJA: nomColor = "NARANJA(F)"; break;
-        case VIOLETA: nomColor = "VIOLETA(F)"; break;
-        default: nomColor = "???";
+        case ROJO: 
+            nomColor = "ROJO";
+            codColor = "\033[31m";
+            break;
+        case AZUL:
+            nomColor = "AZUL";
+            codColor = "\033[34m";
+            break;
+        case VERDE:
+            nomColor = "VERDE";
+            codColor = "\033[32m";
+            break;
+        case AMARILLO:
+            nomColor = "AMARILLO";
+            codColor = "\033[33m";
+            break;
+        case NEGRO:
+            nomColor = "NEGRO (WILD)";
+            codColor = "\033[30m";
+            break; 
+        case ROSA:
+            nomColor = "ROSA(F)";
+            codColor = "\033[35m";
+            break;
+        case TURQUESA:
+            nomColor = "TURQUESA(F)";
+            codColor = "\033[36m";
+            break;
+        case NARANJA:
+            nomColor = "NARANJA(F)";
+            codColor = "\033[38;5;208m";
+            break;
+        case VIOLETA:
+            nomColor = "VIOLETA(F)";
+            codColor = "\033[38;5;93m";
+            break;
+        default: nomColor = "DESCONOCIDO";
     }
     string nomTipo;
     switch(tipo)
     {
-        case NUMERO: nomTipo = to_string(valor); break;
-        case SALTO: nomTipo = "SALTO"; break;
-        case REVERSA: nomTipo = "REVERSA"; break;
-        case MAS_UNO: nomTipo = "+1"; break; 
+        case NUMERO:
+            nomTipo = to_string(valor);
+            break;
+        case SALTO:
+            nomTipo = "SALTO";
+            break;
+        case REVERSA:
+            nomTipo = "REVERSA";
+            break;
+        case MAS_UNO:
+            nomTipo = "+1";
+            break; 
         case MAS_DOS:
             if (color == NEGRO) nomTipo = "+2 (WILD)"; 
             else nomTipo = "+2"; 
             break;
-        case MAS_CUATRO: nomTipo = "+4"; break;
-        case COMODIN_COLOR: nomTipo = "CAMBIO COLOR"; break;
-        case SALTO_TODOS: nomTipo = "SALTO TODOS"; break;
-        case MAS_TRES: nomTipo = "+3"; break; 
-        case MAS_SEIS: nomTipo = "+6"; break; 
-        case COLOR_ETERNO: nomTipo = "COLOR ETERNO"; break;
-        case DESTRUCTORA: nomTipo = "¡¡DESTRUCTORA!!"; break;
-        case PASAR_EXTREMO: nomTipo = "PASAR EXTREMO >>"; break;
-        default: nomTipo = "ACCION";
+        case MAS_CUATRO:
+            nomTipo = "+4";
+            break;
+        case COMODIN_COLOR:
+            nomTipo = "CAMBIO COLOR";
+            break;
+        case SALTO_TODOS:
+            nomTipo = "SALTO TODOS";
+            break;
+        case MAS_TRES:
+            nomTipo = "+3";
+            break; 
+        case MAS_SEIS: 
+            nomTipo = "+6"; 
+            break; 
+        case COLOR_ETERNO: 
+            nomTipo = "COLOR ETERNO"; 
+            break;
+        case DESTRUCTORA: 
+            nomTipo = "¡¡DESTRUCTORA!!"; 
+            break;
+        case PASAR_EXTREMO: 
+            nomTipo = "PASAR EXTREMO >>"; 
+            break;
+        default: nomTipo = "FLIP";
     }
-    return "[" + nomColor + " | " + nomTipo + "]";
+    return codColor + "[" + nomTipo + " | " + nomColor + "]\033[0m";
 }
