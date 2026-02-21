@@ -115,7 +115,7 @@ string Carta::toString()
             nomTipo = "+1";
             break; 
         case MAS_DOS:
-            if (color == NEGRO) nomTipo = "+2 (WILD)"; 
+            if (color == NEGRO) nomTipo = "+2"; 
             else nomTipo = "+2"; 
             break;
         case MAS_CUATRO:

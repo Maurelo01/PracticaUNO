@@ -62,3 +62,28 @@ void Jugador::aplicarDestruccion(TipoCarta tipo)
 {
     mano->eliminarPorTipo(tipo);
 }
+
+int Jugador::aplicarDestruccionExacta(Color col, TipoCarta tip, int val)
+{
+    int i = 0;
+    int destruidas = 0;
+    while (i < mano->getTamaño())
+    {
+        Carta* carta = mano->obtenerPorIndice(i);
+        if (carta->getColor() == col && carta->getTipo() == tip && carta->getValor() == val)
+        {
+            mano->eliminar(carta);
+            if (carta->getLadoOscuro() != nullptr)
+            {
+                delete carta->getLadoOscuro();
+            }
+            delete carta; 
+            destruidas++;
+        }
+        else
+        {
+            i++;
+        }
+    }
+    return destruidas;
+}
