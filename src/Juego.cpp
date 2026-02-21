@@ -156,6 +156,14 @@ void Juego::gestionarTurno()
 {
     Jugador* actual = jugadores->obtenerActual();
     bool turnoTerminado = false;
+    string pausa = "";
+    limpiarPantalla();
+    cout << "----------------------------------------------" << endl << endl << endl;
+    cout << "            TURNO DE: " << actual->getNombre() << endl << endl << endl;
+    cout << "----------------------------------------------" << endl << endl;
+    cout << "Asegurate de que los demas no miren la pantalla" << endl;
+    cout << " -> Presiona ENTER para ver tus cartas.";
+    getline(cin, pausa);
     while (!turnoTerminado)
     {
         actual->ordenarMano(ladoFlipActivo);
@@ -765,7 +773,7 @@ void Juego::repartirCartasIniciales()
     Nodo<Jugador*>* inicio = actual;
     do 
     {
-        for(int i=0; i<7; i++)
+        for(int i = 0; i < 7; i++)
         {
             if(!mazo->estaVacia())
             {

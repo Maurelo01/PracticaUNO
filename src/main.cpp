@@ -60,6 +60,7 @@ int main()
     cout << "6. ¿Permitir ganar lanzando carta negra(Comodín) al final? (s/n): ";
     cin >> opc;
     reglas.ganarConNegra = (opc == 's' || opc == 'S');
+    limpiarBufferMain();
     miJuego.inicializar(numJugadores, reglas);
     miJuego.flujoPrincipal();
     return 0;
