@@ -375,6 +375,7 @@ void Juego::aplicarCartaEspecial(Carta* cartaJugada, bool teniaOpcionDeCarta)
                 }
             }
         }
+        
         if (reglas.acumulacion && (tipo == MAS_DOS || tipo == MAS_CUATRO || tipo == MAS_SEIS || tipo == MAS_TRES || tipo == MAS_UNO)) 
         {
             cartasAcumuladas += cantidad;
@@ -392,6 +393,92 @@ void Juego::aplicarCartaEspecial(Carta* cartaJugada, bool teniaOpcionDeCarta)
                 if (!mazo->estaVacia()) victima->robarCarta(mazo->desapilar());
             }
         }
+    }
+    else if (tipo == DESTRUCTORA)
+    {
+        Jugador* actual = jugadores->obtenerActual();
+        if (actual->cantidadCartas() == 0)
+        {
+            cout << "¡¡¡DESTRUCTORA!!! Pero ya no tienes mas cartas en tu mano para destruir." << endl;
+            return;
+        }
+        cout << "¡¡¡DESTRUCTORA USADA!!!" << endl;
+        cout << "Elige el indice de una carta de tu mano para destruir." << endl;
+        cout << "Se destruira de tu mano y todas las copias exactas de las manos de los demas jugadores." << endl;
+        int indiceSacrificio;
+        Carta* cartaSacrificada = nullptr;
+        while (true)
+        {
+            cout << " -> Indice a destruir: ";
+            if (!(cin >> indiceSacrificio)) 
+            {
+                cin.clear();
+                string sueltas;
+                getline(cin, sueltas);
+                continue;
+            }
+            if (indiceSacrificio >= 0 && indiceSacrificio < actual->cantidadCartas())
+            {
+                cartaSacrificada = actual->getMano()->obtenerPorIndice(indiceSacrificio);
+                break;
+            }
+            else
+            {
+                cout << " Indice invalido, revisa tu mano." << endl;
+            }
+        }
+        Color colObjetivo = cartaSacrificada->getColor();
+        TipoCarta tipObjetivo = cartaSacrificada->getTipo();
+        int valObjetivo = cartaSacrificada->getValor();
+        Carta* visualSacrificada = ladoFlipActivo ? cartaSacrificada->getLadoOscuro() : cartaSacrificada;
+        cout << " ¡Has destruido " << visualSacrificada->toString() << "! Destruyendo copias en todos los mazos..." << endl;
+        Nodo<Jugador*>* inicio = jugadores->getNodoActual();
+        Nodo<Jugador*>* jugadorRevisado = inicio;
+        do
+        {
+            int destruidas = jugadorRevisado->dato->aplicarDestruccionExacta(colObjetivo, tipObjetivo, valObjetivo);
+            if (destruidas > 0)
+            {
+                cout << "  -> ¡" << jugadorRevisado->dato->getNombre() << " ha perdido " << destruidas << " cartas!" << endl;
+            }
+            jugadorRevisado = jugadorRevisado->siguiente;
+        }
+        while (jugadorRevisado != inicio);
+    }
+    else if (tipo == PASAR_EXTREMO)
+    {
+        cout << "¡¡¡PASAR EXTREMO!!! Todos deben pasar su ultima carta al siguiente jugador." << endl;
+        int n = jugadores->getTamaño();
+        Carta** cartasTemp = new Carta*[n];
+        Nodo<Jugador*>** ordenJugadores = new Nodo<Jugador*>*[n];
+        Nodo<Jugador*>* jugadorRevisado = jugadores->getNodoActual();
+        for (int i = 0; i < n; i++) 
+        {
+            ordenJugadores[i] = jugadorRevisado;
+            int cantidad = jugadorRevisado->dato->cantidadCartas();
+            if (cantidad > 0)
+            {
+                cartasTemp[i] = jugadorRevisado->dato->jugarCarta(cantidad - 1);
+            }
+            else
+            {
+                cartasTemp[i] = nullptr;
+            }
+            if (direccionDerecha) jugadorRevisado = jugadorRevisado->siguiente;
+            else jugadorRevisado = jugadorRevisado->anterior;
+        }
+        for (int i = 0; i < n; i++) 
+        {
+            if (cartasTemp[i] != nullptr) 
+            {
+                int indiceReceptor = (i + 1) % n; 
+                ordenJugadores[indiceReceptor]->dato->robarCarta(cartasTemp[i]);
+                Carta* cartaVisual = ladoFlipActivo ? cartasTemp[i]->getLadoOscuro() : cartasTemp[i];
+                cout << "  -> " << ordenJugadores[i]->dato->getNombre() << " le paso la ultima carta " << cartaVisual->toString() << " a " << ordenJugadores[indiceReceptor]->dato->getNombre() << "." << endl;
+            }
+        }
+        delete[] cartasTemp;
+        delete[] ordenJugadores;
     }
     else if (tipo == COLOR_ETERNO)
     {
