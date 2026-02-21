@@ -191,49 +191,90 @@ void Juego::gestionarTurno()
                 turnoTerminado = true;
                 continue;
             }
-            if (mazo->estaVacia())
+            bool cartaEncontrada = false;
+            while (!cartaEncontrada)
             {
-                reponerMazo();
-            }
-            if (mazo->estaVacia())
-            {
-                cout << " !!!El mazo esta vacio¡¡¡ No se puede reponer, pasas turno." << endl;
-                turnoTerminado = true;
-            }
-            else
-            {
+                if (mazo->estaVacia()) reponerMazo();
+                if (mazo->estaVacia())
+                {
+                    cout << " !!!El mazo esta vacio¡¡¡ No se puede reponer, pasas turno." << endl;
+                    turnoTerminado = true;
+                    break;
+                }
                 Carta* robada = mazo->desapilar();
                 actual->robarCarta(robada);
                 Carta* robadaVisual = ladoFlipActivo ? robada->getLadoOscuro() : robada;
                 cout << " Tomaste una carta: " << robadaVisual->toString() << endl;
                 if (robadaVisual->esCompatible(topeVisual))
                 {
-                    cout << " Puedes jugar la carta robada ¿Quieres jugarla de una vez? (s/n): ";
-                    char resp;
-                    cin >> resp;
-                    if (resp == 's' || resp == 'S')
+                    int indiceRecienRobada = actual->cantidadCartas() - 1;
+                    actual->jugarCarta(indiceRecienRobada);
+                    descarte->apilar(robada);
+                    cout << "-> Jugaste la carta compatible: " << robadaVisual->toString() << endl;
+                    if (reglas.gritoUno && actual->cantidadCartas() == 1)
                     {
-                        int indiceRecienRobada = actual->cantidadCartas() - 1;
-                        actual->jugarCarta(indiceRecienRobada);
-                        descarte->apilar(robada);
-                        cout << "-> Jugaste la carta robada: " << robadaVisual->toString() << endl;
-                        if (robadaVisual->getColor() == NEGRO)
+                        cout << "¡¡¡TE QUEDA 1 CARTA!!! Escribe 'UNO' para evitar el castigo: ";
+                        string grito;
+                        cin >> grito;
+                        if (grito != "UNO")
                         {
-                            Color nuevoColor = pedirColorUsuario();
-                            robada->setColor(nuevoColor); 
-                            if(ladoFlipActivo) robadaVisual->setColor(nuevoColor);
-                            cout << "-> COLOR CAMBIADO A: " << nombreColor(nuevoColor) << endl;
+                            cout << " No gritaste UNO correctamente: " << grito << ". Robas +2 de castigo." << endl;
+                            for(int i=0; i<2; i++)
+                            {
+                                if(mazo->estaVacia()) reponerMazo();
+                                if(!mazo->estaVacia()) actual->robarCarta(mazo->desapilar());
+                            }
                         }
-                        aplicarCartaEspecial(robadaVisual, false);
+                        else
+                        {
+                            cout << " ¡Gritaste UNO!" << endl;
+                        }
+                    }
+                    if (robadaVisual->getColor() == NEGRO)
+                    {
+                        Color nuevoColor = pedirColorUsuario();
+                        robada->setColor(nuevoColor); 
+                        if(ladoFlipActivo) robadaVisual->setColor(nuevoColor);
+                        cout << "-> COLOR CAMBIADO A: " << nombreColor(nuevoColor) << endl;
+                    }
+                    aplicarCartaEspecial(robadaVisual, false);
+                    cartaEncontrada = true;
+                }
+                else
+                {
+                    if (reglas.roboHastaJugar)
+                    {
+                        cout << " Esta carta no se puede jugar, toma otra." << endl;
+                        int opcion = 0;
+                        while (opcion != -1)
+                        {
+                            cout << " -> Escribe (-1) para robar otra: ";
+                            if (!(cin >> opcion))
+                            {
+                                cin.clear();
+                                string sueltos;
+                                getline(cin, sueltos);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        cartaEncontrada = true; 
                     }
                 }
-                turnoTerminado = true;
             }
+            turnoTerminado = true;
         }
         else if (opcion >= 0 && opcion < actual->cantidadCartas())
         {
             Carta* cartaFisica = actual->getMano()->obtenerPorIndice(opcion);
             Carta* cartaVisual = ladoFlipActivo ? cartaFisica->getLadoOscuro() : cartaFisica;
+            if (!reglas.ganarConNegra && actual->cantidadCartas() == 1 && cartaVisual->getColor() == NEGRO) 
+            {
+                cout << " !!!No puedes ganar lanzando un comodin como ultima carta." << endl;
+                cout << " Presiona Enter."; cin.ignore(); cin.get();
+                continue;
+            }
             if (cartasAcumuladas > 0)
             {
                 if (cartaVisual->getTipo() != tipoAcumulado)
@@ -246,6 +287,22 @@ void Juego::gestionarTurno()
                 }
                 actual->jugarCarta(opcion);
                 descarte->apilar(cartaFisica);
+                if (reglas.gritoUno && actual->cantidadCartas() == 1)
+                {
+                    cout << "¡¡¡TE QUEDA 1 CARTA!!! Escribe 'UNO' para evitar el castigo: ";
+                    string grito;
+                    cin >> grito;
+                    if (grito != "UNO")
+                    {
+                        cout << " No gritaste UNO correctamente: " << grito << ". Robas +2 de castigo." << endl;
+                        for(int i=0; i<2; i++)
+                        {
+                            if(mazo->estaVacia()) reponerMazo();
+                            if(!mazo->estaVacia()) actual->robarCarta(mazo->desapilar());
+                        }
+                    }
+                    else cout << " ¡Gritaste UNO!" << endl;
+                }
                 if (cartaVisual->getColor() == NEGRO)
                 {
                     Color nuevoColor = pedirColorUsuario();
@@ -275,6 +332,22 @@ void Juego::gestionarTurno()
                     actual->jugarCarta(opcion);
                     descarte->apilar(cartaFisica);
                     cout << "-> Jugaste: " << cartaVisual->toString() << endl;
+                    if (reglas.gritoUno && actual->cantidadCartas() == 1)
+                    {
+                        cout << "¡¡¡TE QUEDA 1 CARTA!!! Escribe 'UNO' para evitar el castigo: ";
+                        string grito;
+                        cin >> grito;
+                        if (grito != "UNO")
+                        {
+                            cout << " No gritaste UNO correctamente: " << grito << ". Robas +2 de castigo." << endl;
+                            for(int i=0; i<2; i++)
+                            {
+                                if(mazo->estaVacia()) reponerMazo();
+                                if(!mazo->estaVacia()) actual->robarCarta(mazo->desapilar());
+                            }
+                        }
+                        else cout << " ¡Gritaste UNO!" << endl;
+                    }
                     if (cartaVisual->getColor() == NEGRO)
                     {
                         Color nuevoColor = pedirColorUsuario();
@@ -593,7 +666,7 @@ void Juego::generarCartas(int numMazos)
                 tempCaraPrincipal[contador] = new Carta(NEGRO, COMODIN_COLOR, -1);
                 tempFlip[contador] = new Carta(NEGRO, COLOR_ETERNO, -1);
                 contador++;
-                tempCaraPrincipal[contador] = new Carta(NEGRO, MAS_CUATRO, -1);
+                tempCaraPrincipal[contador] = new Carta(NEGRO, MAS_DOS, -1);
                 tempFlip[contador] = new Carta(NEGRO, MAS_SEIS, -1);
                 contador++;
                 tempCaraPrincipal[contador] = new Carta(NEGRO, MAS_DOS, -1);
@@ -700,7 +773,8 @@ void Juego::repartirCartasIniciales()
             }
         }
         actual = actual->siguiente;
-    } while (actual != inicio);
+    }
+    while (actual != inicio);
 }
 
 int Juego::getCartasEnMazo() { return mazo->getTamaño(); }
