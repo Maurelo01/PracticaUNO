@@ -115,9 +115,9 @@ void Juego::mostrarMesa(Jugador* actual, Carta* topeVisual)
 {
     cout << " MODO: " << (ladoFlipActivo ? "LADO OSCURO (FLIP)" : "LADO CLARO") << endl;
     cout << " ES TURNO DE: " << actual->getNombre() << endl;
-    cout << "------------------------------------------" << endl;
-    cout << " |MAZO|       |DESCARTE: " << topeVisual->toString() << "|" << endl;
-    cout << "------------------------------------------" << endl;
+    cout << "-----------------------------------------------------" << endl;
+    cout << " |MAZO|: " << mazo->getTamaño() << " CARTAS " << "|DESCARTE: " << topeVisual->toString() << "|" << endl;
+    cout << "-----------------------------------------------------" << endl;
     cout << " TU MANO: " << endl;
     ListaDoble<Carta*>* mano = actual->getMano();
     for(int i = 0; i < mano->getTamaño(); i++)
@@ -156,10 +156,11 @@ void Juego::gestionarTurno()
 {
     Jugador* actual = jugadores->obtenerActual();
     bool turnoTerminado = false;
-    Carta* topeFisico = descarte->verTope();
-    Carta* topeVisual = ladoFlipActivo ? topeFisico->getLadoOscuro() : topeFisico;
     while (!turnoTerminado)
     {
+        actual->ordenarMano(ladoFlipActivo);
+        Carta* topeFisico = descarte->verTope();
+        Carta* topeVisual = ladoFlipActivo ? topeFisico->getLadoOscuro() : topeFisico;
         limpiarPantalla();
         mostrarMesa(actual, topeVisual);
         int opcion = 0;

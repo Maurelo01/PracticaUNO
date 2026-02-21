@@ -19,6 +19,7 @@ class Jugador
         Carta* jugarCarta(int indice);
         bool tieneCarta(TipoCarta tipo);
         void aplicarDestruccion(TipoCarta tipo);
+        void ordenarMano(bool ladoFlipActivo);
         int aplicarDestruccionExacta(Color col, TipoCarta tip, int val);
         int cantidadCartas();
 };
