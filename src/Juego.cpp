@@ -72,7 +72,7 @@ Color Juego::pedirColorUsuario()
     {
         if (!ladoFlipActivo) 
         {
-            cout << "Elige el nuevo color: 1.ROJO  2.AZUL  3.VERDE  4.AMARILLO: ";
+            cout << "-> Elige el nuevo color: 1.ROJO  2.AZUL  3.VERDE  4.AMARILLO: ";
             if (!(cin >> opcion))
             {
                 cin.clear();
@@ -609,8 +609,8 @@ void Juego::inicializar(int numJugadores, ReglasFlags configuracion)
 {
     this->reglas = configuracion;
     int numMazos = ((numJugadores - 1) / 6) + 1;
-    cout << " INICIANDO JUEGO" << endl;
-    cout << "Jugadores: " << numJugadores << " | Mazos generados: " << numMazos << endl;
+    cout << "       INICIANDO JUEGO" << endl;
+    cout << " Jugadores: " << numJugadores << " | Mazos generados: " << numMazos << endl;
     generarCartas(numMazos);
     mazo->barajar();
     for(int i = 1; i <= numJugadores; i++)
@@ -621,7 +621,19 @@ void Juego::inicializar(int numJugadores, ReglasFlags configuracion)
     repartirCartasIniciales();
     if (!mazo->estaVacia())
     {
-        descarte->apilar(mazo->desapilar());
+        Carta* primeraCarta = mazo->desapilar();
+        descarte->apilar(primeraCarta);
+        
+        Carta* visual = ladoFlipActivo ? primeraCarta->getLadoOscuro() : primeraCarta;
+        if (visual->getColor() == NEGRO)
+        {
+            cout << "-> Primera carta es un comodin, " << jugadores->obtenerActual()->getNombre() << " tiene el privilegio de elegir el color inicial." << endl;
+            Color nuevoColor = pedirColorUsuario();
+            primeraCarta->setColor(nuevoColor);
+            if (ladoFlipActivo) visual->setColor(nuevoColor);
+            string sueltos;
+            getline(cin, sueltos);
+        }
     }
 }
 
