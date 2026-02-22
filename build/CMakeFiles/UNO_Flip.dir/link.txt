@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/UNO_Flip.dir/link.d CMakeFiles/UNO_Flip.dir/src/Carta.cpp.o CMakeFiles/UNO_Flip.dir/src/Juego.cpp.o CMakeFiles/UNO_Flip.dir/src/Jugador.cpp.o CMakeFiles/UNO_Flip.dir/src/main.cpp.o -o UNO_Flip
