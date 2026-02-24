@@ -1,0 +1,3 @@
+/snap/cmake/1515/bin/cmake -E rm -f CMakeFiles/UNO_Flip.dir/objects.a
+/usr/bin/x86_64-w64-mingw32-ar qc CMakeFiles/UNO_Flip.dir/objects.a @CMakeFiles/UNO_Flip.dir/objects1.rsp
+/usr/bin/x86_64-w64-mingw32-g++ -Wl,--whole-archive CMakeFiles/UNO_Flip.dir/objects.a -Wl,--no-whole-archive -o UNO_Flip.exe -Wl,--out-implib,libUNO_Flip.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/UNO_Flip.dir/linkLibs.rsp
