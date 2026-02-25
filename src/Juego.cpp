@@ -306,7 +306,6 @@ void Juego::gestionarTurno()
                     cin.get();
                     continue;
                 }
-                // Si la carta es válida, se juega
                 actual->jugarCarta(opcion);
                 descarte->apilar(cartaFisica);
                 if (reglas.gritoUno && actual->cantidadCartas() == 1)
@@ -810,7 +809,6 @@ void Juego::repartirCartasIniciales()
     }
     while (actual != inicio);
 }
-
 int Juego::getCartasEnMazo() { return mazo->getTamaño(); }
 int Juego::getCartasEnDescarte() { return descarte->getTamaño(); }
 int Juego::getCantidadJugadores() { return jugadores->getTamaño(); }
