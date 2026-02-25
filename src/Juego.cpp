@@ -175,7 +175,7 @@ void Juego::gestionarTurno()
         if (cartasAcumuladas > 0)
         {
             cout << " Tienes " << cartasAcumuladas << " cartas acumuladas para robar del mazo." << endl;
-            cout << " Elige tirar una carta igual para acumular más, o escribe (-1) para aceptar tu triste destino." << endl;
+            cout << " Elige tirar una carta igual o mayor para acumular más, o escribe (-1) para aceptar tu triste destino." << endl;
         }
         cout << "-> Elige una carta por su indice o escribe (-1) para robar: ";
         if (!(cin >> opcion))
@@ -286,14 +286,27 @@ void Juego::gestionarTurno()
             }
             if (cartasAcumuladas > 0)
             {
-                if (cartaVisual->getTipo() != tipoAcumulado)
+                int valorNueva = 0;
+                if (cartaVisual->getTipo() == MAS_UNO) valorNueva = 1;
+                else if (cartaVisual->getTipo() == MAS_DOS) valorNueva = 2;
+                else if (cartaVisual->getTipo() == MAS_TRES) valorNueva = 3;
+                else if (cartaVisual->getTipo() == MAS_CUATRO) valorNueva = 4;
+                else if (cartaVisual->getTipo() == MAS_SEIS) valorNueva = 6;
+                int valorActual = 0;
+                if (tipoAcumulado == MAS_UNO) valorActual = 1;
+                else if (tipoAcumulado == MAS_DOS) valorActual = 2;
+                else if (tipoAcumulado == MAS_TRES) valorActual = 3;
+                else if (tipoAcumulado == MAS_CUATRO) valorActual = 4;
+                else if (tipoAcumulado == MAS_SEIS) valorActual = 6;
+                if (valorNueva == 0 || valorNueva < valorActual)
                 {
-                    cout << " !!!Movimiento Invalido. En acumulacion solo puedes tirar un " << (tipoAcumulado == MAS_DOS ? "+2" : "+4") << endl;
+                    cout << " !!!Movimiento Invalido. Para acumular debes tirar una carta de castigo IGUAL o MAYOR a +" << valorActual << endl;
                     cout << "Presiona Enter.";
                     cin.ignore();
                     cin.get();
                     continue;
                 }
+                // Si la carta es válida, se juega
                 actual->jugarCarta(opcion);
                 descarte->apilar(cartaFisica);
                 if (reglas.gritoUno && actual->cantidadCartas() == 1)
